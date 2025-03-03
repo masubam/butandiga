@@ -1,0 +1,48 @@
+version: "3.8"
+services:
+  backend:
+    build: ./flask_react
+    volumes:
+      - ./flask_react/upload:/app/upload
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - FLASK_ENV=production
+      - SQLALCHEMY_DATABASE_URI=mysql://root:MC_Hvjmo3bEvdgv!@db:3306/estores
+      - REDIS_URL=redis://redis:6379/0
+    networks:
+      - app_network
+
+  frontend:
+    build: ./estores
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: MC_Hvjmo3bEvdgv!
+      MYSQL_DATABASE: estores
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      - app_network
+
+  redis:
+    image: redis:alpine # or a specific version like redis:7.0-alpine
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
